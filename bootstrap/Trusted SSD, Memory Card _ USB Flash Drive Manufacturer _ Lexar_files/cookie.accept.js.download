@@ -1,0 +1,65 @@
+//@grant window.close
+var lexarCookieTip = {
+    setCookie: function (name, value) {
+        var exp = new Date();
+        exp.setFullYear(exp.getFullYear() + 1);
+        document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString() + ";path=/";
+    },
+    getCookie: function (name) {
+        var arr, reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+        if (arr = document.cookie.match(reg))
+            return unescape(arr[2]);
+        else
+            return null;
+    },
+    delCookie: function (name) {
+        var exp = new Date();
+        exp.setTime(exp.getTime() - 1);
+        var cval = this.getCookie(name);
+        if (cval != null)
+            document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString();
+    },
+    accept: function () {
+        this.setCookie('cookieAccept', 'yes');
+        this.hideTip();
+    },
+    hideTip: function () {
+        jQuery('#lexar-accept-cookie-wrap').hide();
+    },
+    showTip: function () {
+        jQuery('#lexar-accept-cookie-wrap').show();
+    },
+    accept2: function () {
+        jQuery.ajax({
+            type: "POST",
+            url: '/wp-admin/admin-ajax.php',
+            data: {
+                action: 'lexar_cookie_accept_tip_set'
+            },
+            beforeSend: function () {
+
+            },
+            complete: function () {
+
+            },
+            success: function (rsp) {
+                jQuery('#lexar-accept-cookie').hide();
+            },
+            error: function (rsp, err, obj) {
+                console.log(rsp, 'network error');
+            }
+        });
+    },
+    reject: function () {
+        window.location.href = "about:blank";
+        window.close();
+    }
+};
+jQuery(document).ready(function () {
+    var cookieAccept = lexarCookieTip.getCookie("cookieAccept");
+    if ("yes" == cookieAccept) {
+        lexarCookieTip.hideTip();
+    }else{
+        lexarCookieTip.showTip();
+    }
+});
